@@ -1,0 +1,637 @@
+{
+  "JsonVersion": 6,
+  "MapKey": {
+    "Type": "None",
+    "Path": ""
+  },
+  "missionSettings": {
+    "description": "Champions: you against everyone, on the duel map. You start with one airbase, dealt at random every match, two vehicle depots and a handful of AA mounts. The enemy commander holds every other airbase on the map, attacks you from all of them and defends what it holds.\n\nWin by capturing every airbase on the map. Lose your only base and the match is over.\n\nRequires the Ground Control (RTS) mod, and only the host can construct buildings.",
+    "allowEventContent": false,
+    "Tags": [],
+    "playerMode": "SingleAndMultiplayer",
+    "allowRespawn": true,
+    "playerStartingRank": 0,
+    "rankMultiplier": 1.0,
+    "successfulSortieBonus": 1.0,
+    "nuclearEscalationThreshold": 500.0,
+    "strategicEscalationThreshold": 1200.0,
+    "minRankTacticalWarhead": 0,
+    "minRankStrategicWarhead": 0,
+    "cameraStartPosition": {
+      "IsOverride": false,
+      "Value": {
+        "Position": {
+          "x": 18756.0,
+          "y": 1036.16,
+          "z": 12406.0
+        },
+        "Rotation": {
+          "x": 0.0,
+          "y": 0.9986,
+          "z": 0.0,
+          "w": 0.0523
+        }
+      }
+    },
+    "missionRoads": {
+      "roads": []
+    },
+    "missionSeaLanes": {
+      "roads": []
+    },
+    "wrecksMaxNumber": 10,
+    "wrecksDecayTime": 1.0
+  },
+  "environment": {
+    "timeOfDay": 9.5,
+    "timeFactor": 1.0,
+    "weatherIntensity": 0.1,
+    "cloudAltitude": 2400.0,
+    "windSpeed": 3.0,
+    "windTurbulence": 0.0,
+    "windHeading": 90.0,
+    "windRandomHeading": 0.0,
+    "moonPhase": 14.0
+  },
+  "aircraft": [],
+  "vehicles": [],
+  "ships": [],
+  "buildings": [
+    {
+      "type": "VehicleDepot1",
+      "faction": "Primeva",
+      "UniqueName": "pala_VehicleDepot1_1",
+      "globalPosition": {
+        "x": 13106.7656,
+        "y": 144.734863,
+        "z": -7095.81445
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": -0.8244164,
+        "z": 0.0,
+        "w": 0.5659837
+      },
+      "CaptureStrength": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "CaptureDefense": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "capturable": false,
+      "factoryOptions": {
+        "productionType": "",
+        "productionTime": 900.0
+      }
+    },
+    {
+      "type": "VehicleDepot1",
+      "faction": "Primeva",
+      "UniqueName": "pala_VehicleDepot1_2",
+      "globalPosition": {
+        "x": 13470.166,
+        "y": 144.257446,
+        "z": -8109.40527
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": -0.196555242,
+        "z": 0.0,
+        "w": -0.9804928
+      },
+      "CaptureStrength": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "CaptureDefense": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "capturable": false,
+      "factoryOptions": {
+        "productionType": "",
+        "productionTime": 900.0
+      }
+    },
+    {
+      "type": "Emplacement1_23mm",
+      "faction": "Primeva",
+      "UniqueName": "pala_Emplacement1_23mm_1",
+      "globalPosition": {
+        "x": 13098.8662,
+        "y": 143.3588,
+        "z": -6936.52148
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0582323037,
+        "z": 0.0,
+        "w": 0.998303056
+      },
+      "CaptureStrength": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "CaptureDefense": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "capturable": false,
+      "factoryOptions": {
+        "productionType": "",
+        "productionTime": 900.0
+      }
+    },
+    {
+      "type": "Emplacement1_23mm",
+      "faction": "Primeva",
+      "UniqueName": "pala_Emplacement1_23mm_2",
+      "globalPosition": {
+        "x": 13566.08,
+        "y": 146.650772,
+        "z": -8143.752
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.9986192,
+        "z": 0.0,
+        "w": 0.0525333025
+      },
+      "CaptureStrength": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "CaptureDefense": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "capturable": false,
+      "factoryOptions": {
+        "productionType": "",
+        "productionTime": 900.0
+      }
+    },
+    {
+      "type": "Emplacement1_MANPADS",
+      "faction": "Primeva",
+      "UniqueName": "pala_Emplacement1_MANPADS_1",
+      "globalPosition": {
+        "x": 13247.3223,
+        "y": 144.882751,
+        "z": -7438.963
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.09705384,
+        "z": 0.0,
+        "w": 0.995279133
+      },
+      "CaptureStrength": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "CaptureDefense": {
+        "IsOverride": false,
+        "Value": 0.0
+      },
+      "capturable": false,
+      "factoryOptions": {
+        "productionType": "",
+        "productionTime": 900.0
+      }
+    }
+  ],
+  "scenery": [],
+  "containers": [],
+  "missiles": [],
+  "pilots": [],
+  "factions": [
+    {
+      "factionName": "Boscali",
+      "preventJoin": false,
+      "preventDonation": false,
+      "supplies": [
+        {
+          "UnitType": "COIN",
+          "Count": 0
+        },
+        {
+          "UnitType": "trainer",
+          "Count": 0
+        },
+        {
+          "UnitType": "VTOLTrainer1",
+          "Count": 0
+        },
+        {
+          "UnitType": "SmallFighter1",
+          "Count": 0
+        },
+        {
+          "UnitType": "Fighter1",
+          "Count": 0
+        },
+        {
+          "UnitType": "Multirole1",
+          "Count": 0
+        },
+        {
+          "UnitType": "CAS1",
+          "Count": 0
+        },
+        {
+          "UnitType": "FastBomber1",
+          "Count": 0
+        },
+        {
+          "UnitType": "AttackHelo1",
+          "Count": 0
+        },
+        {
+          "UnitType": "UtilityHelo1",
+          "Count": 0
+        },
+        {
+          "UnitType": "QuadVTOL1",
+          "Count": 0
+        },
+        {
+          "UnitType": "EW1",
+          "Count": 0
+        },
+        {
+          "UnitType": "Darkreach",
+          "Count": 0
+        }
+      ],
+      "startingBalance": 1000.0,
+      "playerJoinAllowance": 60.0,
+      "playerTaxRate": 0.25,
+      "regularIncome": 3.0,
+      "excessFundsDistributePercent": 0.25,
+      "killReward": 3.0,
+      "airSkillMultiplier": 1.0,
+      "surfaceSkillMultiplier": 1.0,
+      "startingWarheads": 0,
+      "reserveWarheads": 0,
+      "reserveAirframes": 0,
+      "extraReservesPerPlayer": 0,
+      "AIAircraftLimit": 0,
+      "reduceAIPerFriendlyPlayer": 0.0,
+      "addAIPerEnemyPlayer": 0.0,
+      "restrictions": {
+        "aircraft": [
+          "UFO"
+        ],
+        "weapons": [
+          "AIR-2_Genie_single"
+        ]
+      },
+      "cameraStartPosition": {
+        "IsOverride": true,
+        "Value": {
+          "Position": {
+            "x": 18756.0,
+            "y": 1036.16,
+            "z": 12406.0
+          },
+          "Rotation": {
+            "x": 0.0,
+            "y": 0.9986,
+            "z": 0.0,
+            "w": 0.0523
+          }
+        }
+      }
+    },
+    {
+      "factionName": "Primeva",
+      "preventJoin": true,
+      "preventDonation": false,
+      "supplies": [
+        {
+          "UnitType": "COIN",
+          "Count": 0
+        },
+        {
+          "UnitType": "trainer",
+          "Count": 0
+        },
+        {
+          "UnitType": "VTOLTrainer1",
+          "Count": 0
+        },
+        {
+          "UnitType": "SmallFighter1",
+          "Count": 0
+        },
+        {
+          "UnitType": "Fighter1",
+          "Count": 0
+        },
+        {
+          "UnitType": "Multirole1",
+          "Count": 0
+        },
+        {
+          "UnitType": "CAS1",
+          "Count": 0
+        },
+        {
+          "UnitType": "FastBomber1",
+          "Count": 0
+        },
+        {
+          "UnitType": "AttackHelo1",
+          "Count": 0
+        },
+        {
+          "UnitType": "UtilityHelo1",
+          "Count": 0
+        },
+        {
+          "UnitType": "QuadVTOL1",
+          "Count": 0
+        },
+        {
+          "UnitType": "EW1",
+          "Count": 0
+        },
+        {
+          "UnitType": "Darkreach",
+          "Count": 0
+        }
+      ],
+      "startingBalance": 1000.0,
+      "playerJoinAllowance": 60.0,
+      "playerTaxRate": 0.25,
+      "regularIncome": 3.0,
+      "excessFundsDistributePercent": 0.25,
+      "killReward": 3.0,
+      "airSkillMultiplier": 1.0,
+      "surfaceSkillMultiplier": 1.0,
+      "startingWarheads": 0,
+      "reserveWarheads": 0,
+      "reserveAirframes": 0,
+      "extraReservesPerPlayer": 0,
+      "AIAircraftLimit": 0,
+      "reduceAIPerFriendlyPlayer": 0.0,
+      "addAIPerEnemyPlayer": 0.0,
+      "restrictions": {
+        "aircraft": [
+          "UFO"
+        ],
+        "weapons": [
+          "AIR-2_Genie_single"
+        ]
+      },
+      "cameraStartPosition": {
+        "IsOverride": true,
+        "Value": {
+          "Position": {
+            "x": 13326.0,
+            "y": 1046.12,
+            "z": -7450.0
+          },
+          "Rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          }
+        }
+      }
+    }
+  ],
+  "airbases": [
+    {
+      "IsOverride": true,
+      "faction": "Primeva",
+      "UniqueName": "North Boscali Airbase",
+      "DisplayName": "North Boscali Airbase",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1561.0,
+      "Center": {
+        "x": -18632.0,
+        "y": 138.76001,
+        "z": 32049.0
+      },
+      "SelectionPosition": {
+        "x": -18550.0,
+        "y": 137.057,
+        "z": 32192.7
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "Primeva",
+      "UniqueName": "Maris Airport",
+      "DisplayName": "Maris Airport",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1473.0,
+      "Center": {
+        "x": 13090.0,
+        "y": 142.7454,
+        "z": 19716.0
+      },
+      "SelectionPosition": {
+        "x": 12802.6,
+        "y": 135.155411,
+        "z": 19235.3
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "Boscali",
+      "UniqueName": "K92 Highway Strip",
+      "DisplayName": "K92 Highway Strip",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 746.0,
+      "Center": {
+        "x": 18756.0,
+        "y": 136.16,
+        "z": 12406.0
+      },
+      "SelectionPosition": {
+        "x": 18943.8867,
+        "y": 132.815,
+        "z": 12574.958
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "Primeva",
+      "UniqueName": "Dustbowl Highway Strip",
+      "DisplayName": "Dustbowl Highway Strip",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 746.0,
+      "Center": {
+        "x": 13326.0,
+        "y": 146.12,
+        "z": -7450.0
+      },
+      "SelectionPosition": {
+        "x": 13351.44,
+        "y": 145.872009,
+        "z": -7709.05
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "Primeva",
+      "UniqueName": "Sandrift Airbase",
+      "DisplayName": "Sandrift Airbase",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 975.0,
+      "Center": {
+        "x": 27807.69,
+        "y": 135.47345,
+        "z": -18910.1543
+      },
+      "SelectionPosition": {
+        "x": 27574.4785,
+        "y": 135.432465,
+        "z": -19351.6035
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "Primeva",
+      "UniqueName": "Agrapol Airbase",
+      "DisplayName": "Agrapol Airbase",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1463.0,
+      "Center": {
+        "x": -1131.0,
+        "y": 137.6,
+        "z": -26845.0
+      },
+      "SelectionPosition": {
+        "x": -905.9,
+        "y": 136.73999,
+        "z": -27339.9
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "Primeva",
+      "UniqueName": "Vigil Cay Naval Airbase",
+      "DisplayName": "Vigil Cay Naval Airbase",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 1332.0,
+      "Center": {
+        "x": -33994.5,
+        "y": 18.3999939,
+        "z": -12111.0
+      },
+      "SelectionPosition": {
+        "x": -34213.5664,
+        "y": 19.985,
+        "z": -12459.1035
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    },
+    {
+      "IsOverride": true,
+      "faction": "Primeva",
+      "UniqueName": "South Boscali General Aviation",
+      "DisplayName": "South Boscali General Aviation",
+      "Disabled": false,
+      "Capturable": true,
+      "CaptureDefense": 10.0,
+      "CaptureRange": 900.0,
+      "Center": {
+        "x": -9875.6,
+        "y": 136.6,
+        "z": -6479.2
+      },
+      "SelectionPosition": {
+        "x": -10265.02,
+        "y": 136.43,
+        "z": -6532.09
+      },
+      "Tower": "",
+      "VerticalLandingPoints": [],
+      "ServicePoints": [],
+      "roads": {
+        "roads": []
+      },
+      "runways": []
+    }
+  ],
+  "objectives": [
+    {
+      "Type": "None",
+      "UniqueName": "Mission Start",
+      "Faction": "",
+      "DisplayName": "",
+      "Hidden": true,
+      "Outcomes": []
+    }
+  ],
+  "outcomes": []
+}

@@ -1,0 +1,13 @@
+/bin/
+/obj/
+/.vs/
+/.idea/
+*.csproj.user
+*.suo
+*.user
+*.log
+*.cache
+*.dll
+/.github/lint/bin/
+/.github/lint/obj/
+/issues/

@@ -1,0 +1,63 @@
+Ground Control (RTS) License
+
+Copyright (c) 2026 simonsimme (https://github.com/simonsimme) and the
+Ground Control (RTS) contributors
+
+Ground Control (RTS) is source-available software. It is free for
+non-commercial use under the conditions below. It is not "open source" as
+defined by the Open Source Initiative, because commercial use is restricted.
+
+Original repository: https://github.com/simonsimme/Ground-Controll-RTS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, merge, fork, publish and distribute the Software and works
+derived from it, subject to the following conditions:
+
+1. Attribution. Any distribution of the Software, or of any work that uses
+   or is derived from any part of it, must state in a visible place in its
+   documentation (for example its README or its mod page) that it is
+   "based on Ground Control (RTS)", together with a working link to the
+   original repository named above.
+
+2. Notices. The above copyright notice and this license must be kept, unaltered,
+   in every copy of the source code.
+
+3. Name and branding. The names "Ground Control (RTS)", "Ground Control RTS"
+   and "GC RTS", and the project's icon and logo, identify the original
+   project. A derived work may not use them, or anything confusingly similar,
+   as its own name or icon, and may not state or imply that it is the
+   official version or that it is endorsed by the copyright holder. A derived
+   work must use a different name. Using the names only to give the
+   attribution required by condition 1 is permitted.
+
+4. Non-commercial use only. The Software, and any work that uses or is
+   derived from any part of it, may not be sold, licensed for a fee, placed
+   behind a paywall or paid early access, bundled with a paid product, or
+   otherwise used for commercial gain. Voluntary donations that are not
+   required to obtain the Software or the derived work are permitted.
+
+5. Videos and streams. Recording, streaming and publishing gameplay that uses
+   the Software or a derived work is permitted, including on monetized
+   channels (for example YouTube, Twitch and similar platforms with ads,
+   sponsorships, memberships or donations). This is not commercial gain under
+   condition 4, provided the Software itself is not sold or paywalled.
+
+6. Same terms. Works that use or are derived from the Software must be
+   distributed under these same conditions.
+
+
+Permission for any use outside these conditions requires prior written
+consent from the copyright holder.
+
+This license covers the Ground Control (RTS) source code and files in this
+repository only. Nuclear Option and its assets belong to their respective
+owners and are not covered by this license.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,0 +1,27 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+    paths: ['**.cs', '.editorconfig', 'stylecop.json', '.github/lint/**', '.github/workflows/lint.yml']
+  pull_request:
+    branches: [main]
+    paths: ['**.cs', '.editorconfig', 'stylecop.json', '.github/lint/**', '.github/workflows/lint.yml']
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      # Same SDK the mod is built with locally, so the analyzers agree with the local build. The
+      # runner also has newer SDKs, and even 6.0.428 misreads the missing game types (hundreds of
+      # CS1503, IDE0074), so global.json pins the exact local version.
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: .github/lint/global.json
+
+      # StyleCop + Roslyn over the C# sources only; no game DLLs needed (see .github/lint/Lint.csproj).
+      # Runs from .github/lint so dotnet picks up that folder's global.json.
+      - run: dotnet format Lint.csproj --verify-no-changes
+        working-directory: .github/lint

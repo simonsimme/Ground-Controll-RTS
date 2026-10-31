@@ -1,0 +1,12 @@
+#!/bin/sh
+# Runs the same StyleCop + Roslyn check as .github/workflows/lint.yml, without the game DLLs.
+# Enable once per clone: git config core.hooksPath .githooks   (skip a run: git commit --no-verify)
+git diff --cached --name-only --diff-filter=ACMR | grep -qE '\.cs$|^\.editorconfig$|^stylecop\.json$|^\.github/lint/' || exit 0
+cd .github/lint && dotnet format Lint.csproj --verify-no-changes || {
+  # Never suggest a plain `dotnet format Lint.csproj`: its style pass cannot see the game's DLLs,
+  # reads every game `using` as unused and deletes it (ignoring NoWarn and --exclude-diagnostics).
+  # whitespace + analyzers is safe; fix any IDE style finding by hand.
+  echo "pre-commit: lint failed. Fix with: (cd .github/lint && dotnet format whitespace Lint.csproj && dotnet format analyzers Lint.csproj --exclude-diagnostics IDE0002 IDE0005 IDE0029 IDE0031 IDE0042 IDE0044 IDE0060 CA1812)"
+  echo "pre-commit: do NOT run a plain 'dotnet format Lint.csproj', it deletes the game usings."
+  exit 1
+}

@@ -1,0 +1,146 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>GroundControlRts</AssemblyName>
+    <RootNamespace>GroundControlRts</RootNamespace>
+    <Version>0.9.9.9</Version>
+    <AssemblyVersion>0.9.9.9</AssemblyVersion>
+    <FileVersion>0.9.9.9</FileVersion>
+    <InformationalVersion>0.9.9.9</InformationalVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- The SDK would otherwise stamp the git remote into the .pdb as a source link. -->
+    <EnableSourceLink>false</EnableSourceLink>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- IDE0005 (unused usings) is only reported on build when XML docs are generated. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.19.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- The public build: dotnet build -c Release -p:NoLogs=true. Compiles out every Ground Control
+       log line (Core/CommanderLog.cs). Same output path and install. No debug info either: it
+       writes this machine's folder path into the DLL. -->
+  <PropertyGroup Condition="'$(NoLogs)' != 'true'">
+    <DefineConstants>$(DefineConstants);GC_LOGS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(NoLogs)' == 'true'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GameDir Condition="'$(GameDir)' == ''">$(NUCLEAR_OPTION_DIR)</GameDir>
+  </PropertyGroup>
+
+  <Target Name="ValidateGameDirectory" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(GameDir)' == ''" Text="Set GameDir or the NUCLEAR_OPTION_DIR environment variable to the Nuclear Option installation directory." />
+  </Target>
+
+  <ItemGroup>
+    <!-- Missions that ship with the mod. CommanderMissionInstaller reads them from the plugin
+         folder at load, so they must land next to the DLL rather than in a subfolder. -->
+    <None Include="Mission\*.json" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- A Release build installs itself into the game, so the build command is also the install
+       command. Skipped when the game has no BepInEx folder (a machine without the game). Fails
+       if the game is running, because Windows locks a loaded DLL: close the game and rebuild. -->
+  <PropertyGroup>
+    <PluginInstallDir>$(GameDir)\BepInEx\plugins\GroundControlRts</PluginInstallDir>
+  </PropertyGroup>
+
+  <Target Name="InstallIntoGame" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' And Exists('$(GameDir)\BepInEx\plugins')">
+    <ItemGroup>
+      <PluginFiles Include="$(OutDir)$(AssemblyName).dll;$(OutDir)*.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginInstallDir)" />
+    <Message Importance="high" Text="Installed into $(PluginInstallDir)" />
+  </Target>
+
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(GameDir)\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(GameDir)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Mirage">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\Mirage.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\Rewired_Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- URP post-processing, for the night-vision volume: ColorAdjustments and Bloom. -->
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Universal.Runtime">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(GameDir)\NuclearOption_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

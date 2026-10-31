@@ -1,0 +1,29 @@
+<!-- CI-only project: runs StyleCop and the Roslyn analyzers over the mod's C# files through
+     `dotnet format`, which, unlike a build, keeps analyzing when the game's DLLs are missing.
+     Settings mirror GroundControlRts.csproj; keep the analyzer versions in step with it.
+     Only ever run the verify-no-changes check here, or the `whitespace` / `analyzers`
+     subcommands: the default and `style` passes delete every game `using` (NoWarn does not stop
+     them). See .githooks/pre-commit for the safe fix command. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Without the game's types these rules misfire (every game `using` looks unused, Unity's
+         null checks look replaceable ...). The local build with the game installed still runs them. -->
+    <NoWarn>$(NoWarn);IDE0002;IDE0005;IDE0029;IDE0031;IDE0042;IDE0044;IDE0060;CA1812</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../**/*.cs" Exclude="../../bin/**;../../obj/**;../../.github/**" />
+    <AdditionalFiles Include="../../stylecop.json" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Unity.Analyzers" Version="1.19.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

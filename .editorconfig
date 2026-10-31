@@ -1,0 +1,56 @@
+root = true
+
+[*.cs]
+# Roslyn runs strict: AnalysisLevel latest-all in the csproj turns on every CA rule, the two lines
+# below turn on every IDE code-style and code-quality rule, and TreatWarningsAsErrors makes each
+# one fail the build.
+dotnet_analyzer_diagnostic.category-Style.severity = warning
+dotnet_analyzer_diagnostic.category-CodeQuality.severity = warning
+
+# Code-style preferences, set to how this codebase is written.
+csharp_style_namespace_declarations = file_scoped:warning
+dotnet_style_prefer_conditional_expression_over_return = false
+
+# Rules turned off, each for a reason.
+# IDE0058 would force `_ =` on every deliberately ignored result (List.Remove, HashSet.Add ...).
+dotnet_diagnostic.IDE0058.severity = none
+# IDE0130: the whole mod is the single GroundControlRts namespace; folders are features.
+dotnet_diagnostic.IDE0130.severity = none
+# IDE0010/IDE0072 want every member of a game enum listed even where `default` is the intent.
+dotnet_diagnostic.IDE0010.severity = none
+dotnet_diagnostic.IDE0072.severity = none
+# IDE0047 calls the parentheses in (a * b) % c unnecessary; SA1407 requires them.
+dotnet_diagnostic.IDE0047.severity = none
+# IDE0078 rewrites `unit == null || unit is Missile` as `unit is null or Missile`, and a pattern's null
+# test skips Unity's check for a destroyed object.
+dotnet_diagnostic.IDE0078.severity = none
+# IDE0270 (`x ?? throw`) and IDE0074 (`x ??= y`) have the same flaw: `??` skips Unity's check for a
+# destroyed object, so they would turn a working `if (unit == null)` into a bug.
+dotnet_diagnostic.IDE0270.severity = none
+dotnet_diagnostic.IDE0074.severity = none
+# IDE0028/0300/0301/0305 want C# 12 collection expressions (`[]`). The lint CI runs SDK 6, which
+# cannot parse them, and the codebase's idiom is `new()`.
+dotnet_diagnostic.IDE0028.severity = none
+dotnet_diagnostic.IDE0300.severity = none
+dotnet_diagnostic.IDE0301.severity = none
+dotnet_diagnostic.IDE0305.severity = none
+# CA1508 (dead conditional code) does not know Unity's overloaded == (a destroyed object equals
+# null) or that state changes across a coroutine's yield: 15 of its 18 findings here were wrong,
+# and following them deletes real null checks.
+dotnet_diagnostic.CA1508.severity = none
+# CA5394: System.Random here rolls gameplay dice (the Champions deal, build-site darts), not keys.
+dotnet_diagnostic.CA5394.severity = none
+# SA1101 wants `this.` on every member access, which contradicts IDE0003 and .NET convention.
+dotnet_diagnostic.SA1101.severity = none
+# SA1633: the mod is released under the Unlicense, so there is no copyright header to write.
+dotnet_diagnostic.SA1633.severity = none
+# SA1623 wants every property summary to open with "Gets or sets"; these say why the property exists.
+dotnet_diagnostic.SA1623.severity = none
+
+[**/*Patches.cs]
+# Harmony injects __instance, __result, __state and ___privateField by parameter name.
+dotnet_diagnostic.SA1313.severity = none
+
+[Core/ICommanderService.cs]
+# The five lifecycle interfaces are one contract and read best side by side.
+dotnet_diagnostic.SA1649.severity = none
