@@ -4,8 +4,7 @@
 
 ### Fixed
 
-- Faction-limited depots sell their own variants and shared vehicles. Hosts enforce the same
-  roster for guest purchases, and vehicles already in reserve can still deploy.
+- Faction-limited depots with **Depots sell faction and shared vehicles only** enabled, sell their own variants and shared vehicles (that don't have counterparts in both factions, like SPAAGs etc.) correctly. Hosts enforce the same roster for guest purchases, and vehicles already in reserve can still deploy.
 
 ## 1.0.0.2
 

@@ -43,10 +43,6 @@ Join us on **[Discord](https://discord.gg/F5DGy9ystd)**.
 - **Rules your way:** unit caps, unit bans, game speed and your own prices.
 - **Mission editor:** tick Ground Control RTS in a mission's parameters to make your own map.
 
-Enable **Depots sell faction and shared vehicles only** in the mission settings to limit purchases
-to each depot owner's variants and shared equipment such as the M12 Jackknife and both SPAAGs.
-Turn it off to allow the full purchase roster. Vehicles already in reserve can still deploy.
-
 ## Gallery
 
 **Rescue**
