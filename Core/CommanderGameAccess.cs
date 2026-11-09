@@ -1023,11 +1023,6 @@ internal static class CommanderGameAccess
         return buffer.Count > 0;
     }
 
-    internal static void CollectFactionVehicleDefinitions(List<VehicleDefinition> buffer)
-    {
-        CollectFactionVehicleDefinitions(buffer, GetSupplyHq());
-    }
-
     /// <summary>The ground units <paramref name="hq"/>'s faction fields, from its convoy groups.</summary>
     internal static void CollectFactionVehicleDefinitions(List<VehicleDefinition> buffer, FactionHQ? hq)
     {

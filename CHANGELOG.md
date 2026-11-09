@@ -1,5 +1,12 @@
 ﻿# Changelog
 
+## Unreleased
+
+### Fixed
+
+- Faction-limited depots sell their own variants and shared vehicles. Hosts enforce the same
+  roster for guest purchases, and vehicles already in reserve can still deploy.
+
 ## 1.0.0.2
 
 ### Added

@@ -76,7 +76,6 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
     private readonly List<VehicleDepotEntry> depots = new();
     private readonly List<VehicleDefinition> vehicleDefinitions = new();
     private readonly List<VehicleDefinition> productionVehicleDefinitions = new();
-    private readonly List<VehicleDefinition> factionVehicleDefinitions = new();
     private readonly List<VehicleDefinition> emptyVehicleDefinitions = new();
     private readonly List<VehicleDefinition> filteredVehicleDefinitions = new();
     private readonly Dictionary<string, List<VehicleDefinition>> definitionsByCategory = new(StringComparer.Ordinal);
@@ -115,6 +114,9 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
         CommanderNetwork.OnGuest("depot.ack", OnDepotAck);
         CommanderNetwork.OnHost("depot.slot", HostBookBuild);
         CommanderNetwork.OnGuest("depot.slot.ack", OnBuildBooked);
+        CommanderNetwork.OnGuest("depot.roster", static args => CommanderDepotVehicleRoster.HostFactionOnly = CommanderNetwork.Bool(args, 1));
+        CommanderNetwork.OnSync(static (_, messages) =>
+            messages.Add(new[] { "depot.roster", CommanderNetwork.Flag(CommanderSettings.LimitToFactoryVehicles) }));
         CommanderQueuePayment.Initialize();
     }
 
@@ -160,13 +162,13 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
     {
         Deactivate();
         CommanderQueuePayment.ResetSession();
+        CommanderDepotVehicleRoster.HostFactionOnly = null;
         autoReserveDepot = null;
         depotQueues.Clear();
         depotFreeAt.Clear();
         guestBookings.Clear();
         vehicleDefinitions.Clear();
         productionVehicleDefinitions.Clear();
-        factionVehicleDefinitions.Clear();
         productionCategories.Clear();
         factionCategories.Clear();
         definitionsByCategory.Clear();
@@ -390,16 +392,22 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
             RefreshVehicleDefinitions();
         }
 
-        if (!CommanderSettings.LimitToFactoryVehicles)
+        if (!CommanderDepotVehicleRoster.FactionOnly || CommanderDraftService.IsDraftMission)
         {
             return categories;
         }
 
-        RefreshFactionVehicleDefinitions();
+        FactionHQ? hq = SelectedDepot != null ? SelectedDepot.NetworkHQ : null;
         factionCategories.Clear();
-        for (int i = 0; i < factionVehicleDefinitions.Count; i++)
+        for (int i = 0; i < vehicleDefinitions.Count; i++)
         {
-            string category = CommanderGameAccess.GetVehicleCategoryLabel(factionVehicleDefinitions[i]);
+            VehicleDefinition definition = vehicleDefinitions[i];
+            if (!CommanderDepotVehicleRoster.AllowsPurchase(hq, definition))
+            {
+                continue;
+            }
+
+            string category = CommanderGameAccess.GetVehicleCategoryLabel(definition);
             if (!factionCategories.Contains(category))
             {
                 factionCategories.Add(category);
@@ -449,22 +457,17 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
             return filteredVehicleDefinitions;
         }
 
-        bool factionOnly = CommanderSettings.LimitToFactoryVehicles;
-        if (!factionOnly && !CommanderUnitBanService.AnyBanned)
+        if (!CommanderDepotVehicleRoster.FactionOnly && !CommanderUnitBanService.AnyBanned)
         {
             return source;
         }
 
-        if (factionOnly)
-        {
-            RefreshFactionVehicleDefinitions();
-        }
-
+        FactionHQ? hq = SelectedDepot != null ? SelectedDepot.NetworkHQ : null;
         filteredVehicleDefinitions.Clear();
         for (int i = 0; i < source.Count; i++)
         {
             VehicleDefinition definition = source[i];
-            if ((!factionOnly || factionVehicleDefinitions.Contains(definition)) && !CommanderUnitBanService.IsBanned(definition))
+            if (CommanderDepotVehicleRoster.AllowsPurchase(hq, definition) && !CommanderUnitBanService.IsBanned(definition))
             {
                 filteredVehicleDefinitions.Add(definition);
             }
@@ -608,11 +611,22 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
         }
 
         float paid = 0f;
-        FactionHQ? hq = CommanderGameAccess.GetLocalHq();
-        if (hq != null
-            && !CommanderDraftService.IsDraftMission
-            && CommanderFactionVehicleService.GetReserveCount(definition) <= CountQueued(definition, unpaidOnly: true))
+        FactionHQ? hq = queue.Depot.NetworkHQ;
+        if (hq == null || hq != CommanderGameAccess.GetLocalHq())
         {
+            SetStatus("Select a friendly depot first.");
+            return;
+        }
+
+        if (!CommanderDraftService.IsDraftMission
+            && hq.GetUnitSupply(definition) <= CountQueued(definition, unpaidOnly: true))
+        {
+            if (!CommanderDepotVehicleRoster.AllowsPurchase(hq, definition))
+            {
+                SetStatus(CommanderFactionVehicleService.FactionPurchaseRefusal(definition));
+                return;
+            }
+
             if (CommanderNetwork.IsGuest)
             {
                 BuyThroughHost(queue.Depot, definition);
@@ -1378,7 +1392,7 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
         {
             if (paid <= 0f)
             {
-                SetStatus($"Insufficient faction funds for {label}.");
+                SetStatus($"Purchase refused for {label}.");
             }
             else if (depot == null)
             {
@@ -1631,11 +1645,6 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
         productionCatalogDirty = true;
     }
 
-    private void RefreshFactionVehicleDefinitions()
-    {
-        CommanderGameAccess.CollectFactionVehicleDefinitions(factionVehicleDefinitions);
-    }
-
     private void SyncSelectedDepotFromSelection()
     {
         Unit? focusedUnit = selectionService.FocusedSelection;
@@ -1719,7 +1728,8 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
 
             VehicleDefinition definition = queue.PendingDefinitions[0];
             bool prepaid = queue.PendingPaid[0] > 0f;
-            if (!prepaid && !CommanderFactionVehicleService.CanAcquire(definition, out string reason))
+            FactionHQ? hq = queue.Depot.NetworkHQ;
+            if (!CommanderFactionVehicleService.CanAcquire(hq, definition, prepaid, out string reason))
             {
                 SetStatus(reason);
                 CommanderNotice.Fail($"{CommanderGameAccess.GetVehicleLabel(definition)} CANNOT SPAWN: {reason}");
@@ -1778,7 +1788,7 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
 
             if (!prepaid)
             {
-                CommanderFactionVehicleService.CommitAcquisition(definition);
+                CommanderFactionVehicleService.CommitAcquisition(hq, definition);
             }
 
             MarkSpawned(queue);
@@ -1918,7 +1928,8 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
             && !depot.disabled
             && ReferenceEquals(depot.NetworkHQ, hq)
             && CommanderNetwork.Sender != null
-            && CommanderNetwork.Definition<VehicleDefinition>(CommanderNetwork.Arg(args, 2)) is VehicleDefinition definition)
+            && CommanderNetwork.Definition<VehicleDefinition>(CommanderNetwork.Arg(args, 2)) is VehicleDefinition definition
+            && (hq.GetUnitSupply(definition) > 0 || CommanderDepotVehicleRoster.AllowsPurchase(hq, definition)))
         {
             // A guest asks again after 5 s, and a slow answer is not a second unit.
             (VehicleDepot, INetworkPlayer) key = (depot, CommanderNetwork.Sender);
@@ -1975,7 +1986,7 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
             // Bought when it was queued: the deposit pays, and the balance has no say in it now.
             float paid = CommanderNetwork.Float(args, 3);
             bool prepaid = CommanderQueuePayment.Holds(paid);
-            if (!prepaid && !CommanderFactionVehicleService.CanAcquire(definition, out string reason))
+            if (!CommanderFactionVehicleService.CanAcquire(hq, definition, prepaid, out string reason))
             {
                 CommanderNotice.Fail($"{CommanderGameAccess.GetVehicleLabel(definition)} CANNOT SPAWN: {reason}");
             }
@@ -1987,7 +1998,7 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
                 }
                 else
                 {
-                    CommanderFactionVehicleService.CommitAcquisition(definition);
+                    CommanderFactionVehicleService.CommitAcquisition(hq, definition);
                 }
 
                 spawned = true;

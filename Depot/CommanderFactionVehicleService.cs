@@ -63,9 +63,20 @@ internal sealed class CommanderFactionVehicleService : ICommanderResetSession
         return Math.Max(0f, definition.value);
     }
 
-    internal static bool CanAcquire(VehicleDefinition definition, out string reason)
+    internal static string FactionPurchaseRefusal(VehicleDefinition definition)
     {
-        if (GetReserveCount(definition) > 0)
+        return $"This faction cannot buy {CommanderGameAccess.GetVehicleLabel(definition)}.";
+    }
+
+    internal static bool CanAcquire(FactionHQ? hq, VehicleDefinition definition, bool prepaid, out string reason)
+    {
+        if (hq == null)
+        {
+            reason = "This depot has no faction.";
+            return false;
+        }
+
+        if (!prepaid && hq.GetUnitSupply(definition) > 0)
         {
             reason = string.Empty;
             return true;
@@ -78,8 +89,13 @@ internal sealed class CommanderFactionVehicleService : ICommanderResetSession
             return false;
         }
 
-        float cost = GetPurchaseCost(definition);
-        if (FactionFunds >= cost)
+        if (!CommanderDepotVehicleRoster.AllowsPurchase(hq, definition))
+        {
+            reason = FactionPurchaseRefusal(definition);
+            return false;
+        }
+
+        if (prepaid || hq.factionFunds >= GetPurchaseCost(definition))
         {
             reason = string.Empty;
             return true;
@@ -89,9 +105,8 @@ internal sealed class CommanderFactionVehicleService : ICommanderResetSession
         return false;
     }
 
-    internal static void CommitAcquisition(VehicleDefinition definition)
+    internal static void CommitAcquisition(FactionHQ? hq, VehicleDefinition definition)
     {
-        FactionHQ? hq = CommanderGameAccess.GetLocalHq();
         if (hq == null)
         {
             return;
