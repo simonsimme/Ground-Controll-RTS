@@ -19,24 +19,27 @@ internal static class CommanderDepotVehicleRoster
         ["AFV8_APC"] = Bdf,
         ["AFV8_IFV"] = Bdf,
         ["AFV8_SAM"] = Bdf,
+        ["MBT"] = Bdf, // Type-12
+        ["CRAMTrailer1"] = Bdf,
+        ["LaserTrailer1"] = Bdf, // HLT-HEL
+        ["HLT-MART"] = Bdf,
+        ["SAMTrailer1"] = Bdf, // Towed StratoLance R9
+        ["SPAAG1"] = Bdf, // AeroSentry
+        ["LCV45"] = Bdf,
         ["Linebreaker_APC"] = Pala,
         ["Linebreaker_IFV"] = Pala,
         ["Linebreaker_SAM"] = Pala,
-        ["MBT"] = Bdf, // Type-12
         ["MBT1"] = Pala, // Spearhead
-        ["CRAMTrailer1"] = Bdf,
         ["Truck2-CRAM"] = Pala,
-        ["LaserTrailer1"] = Bdf, // HLT-HEL
         ["Truck2-LADS"] = Pala,
-        ["HLT-MART"] = Bdf,
         ["Truck2-MLRS"] = Pala,
-        ["SAMTrailer1"] = Bdf, // Towed StratoLance R9
         ["Truck2-RSAM"] = Pala, // MSV R9 Stratolance
-        ["SPAAG1"] = Shared, // AeroSentry
-        ["SPAAG2"] = Shared, // Anvil
-        ["Truck2-TBM"] = Shared,
-        ["Truck2-TBM-N"] = Shared,
-        ["UGVDozer1"] = Shared, // M12 Jackknife
+        ["SPAAG2"] = Pala, // Anvil
+        ["Truck2-MRAP"] = Pala,
+        ["RadarSAM1"] = Pala,
+        ["Truck2-TBM"] = Pala, // MSV Ballistic Missile Launcher HE
+        ["Truck2-TBM-N"] = Pala, // MSV Ballistic Missile Launcher N
+        ["UGVDozer1"] = Shared // M12 Jackknife
     };
 
     internal static bool? HostFactionOnly { get; set; }
