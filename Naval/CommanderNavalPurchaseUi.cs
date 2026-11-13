@@ -193,12 +193,13 @@ internal sealed class CommanderNavalPurchaseUi
         string status = service.StatusText;
         float statusHeight = string.IsNullOrWhiteSpace(status) ? 0f : 40f;
         List<string>? teamLines = CommanderTeamQueueService.Instance?.Lines;
-        int teamRows = Mathf.Min(teamLines?.Count ?? 0, CommanderDepotUi.MaxTeamLines);
-        float teamHeight = teamRows > 0 ? 28f + (teamRows * CommanderDepotUi.TeamLineHeight) : 0f;
+        bool hasTeam = teamLines != null && teamLines.Count > 0;
 
         // The queue bar trades with the ship list, so a drag never pushes PURCHASE out.
-        float maxQueue = Mathf.Max(DefaultQueueHeight, windowRect.height - y - footerHeight - teamHeight - statusHeight - 12f - 120f);
+        // The team box takes the same height again, so the drag range halves when it shows.
+        float maxQueue = Mathf.Max(DefaultQueueHeight, (windowRect.height - y - footerHeight - statusHeight - 12f - 120f) / (hasTeam ? 2f : 1f));
         float queueHeight = CommanderWindowScale.Section(WindowId, QueueSlot, DefaultQueueHeight, DefaultQueueHeight, maxQueue);
+        float teamHeight = CommanderDepotUi.TeamQueuesHeight(teamLines, queueHeight);
         float listHeight = Mathf.Max(120f, windowRect.height - y - footerHeight - queueHeight - teamHeight - statusHeight - 12f);
         DrawShipList(new Rect(12f, y, windowRect.width - 24f - detailWidth - 8f, listHeight), dockLevel);
         DrawDetail(new Rect(windowRect.width - 12f - detailWidth, y, detailWidth, listHeight), dockLevel);
@@ -209,9 +210,9 @@ internal sealed class CommanderNavalPurchaseUi
             WindowId, QueueSlot, new Rect(12f, y - 8f, windowRect.width - 24f, 8f), alongX: false, inverted: true, queueHeight, DefaultQueueHeight, maxQueue);
         DrawBuildQueue(new Rect(12f, y, windowRect.width - 24f, queueHeight - 8f));
         y += queueHeight;
-        if (teamRows > 0)
+        if (hasTeam)
         {
-            CommanderDepotUi.DrawTeamQueues(new Rect(12f, y, windowRect.width - 24f, teamHeight - 8f), teamLines!, teamRows);
+            CommanderDepotUi.DrawTeamQueues(new Rect(12f, y, windowRect.width - 24f, teamHeight - 8f), teamLines!);
             y += teamHeight;
         }
 

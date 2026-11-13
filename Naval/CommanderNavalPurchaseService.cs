@@ -482,7 +482,7 @@ internal sealed class CommanderNavalPurchaseService : ICommanderActivate, IComma
         {
             DockQueue queue = dockQueues[q];
 
-            // ponytail: a queue with no dock clicked has no id to show it under; skipped until that matters.
+            // A queue with no dock clicked has no id to show it under; skipped until that matters.
             if (queue.Ships.Count == 0 || queue.Dock == null)
             {
                 continue;

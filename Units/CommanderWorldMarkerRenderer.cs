@@ -25,6 +25,7 @@ internal sealed class CommanderWorldMarkerRenderer
     /// <summary>Terrain-following ring per store, sampled once: a building does not move, and a
     /// sample is a raycast per point.</summary>
     private static readonly Dictionary<Unit, GlobalPosition[]> ResupplyRings = new();
+    private static readonly GlobalPosition[] MobileRingPoints = new GlobalPosition[72];
 
     private readonly CommanderSelectionService selectionService;
     private readonly CommanderMoveService moveService;
@@ -230,13 +231,17 @@ internal sealed class CommanderWorldMarkerRenderer
         }
     }
 
-    /// <summary>A munitions bunker or an ammo dump: the stores a unit parked beside rearms from.</summary>
+    /// <summary>A munitions bunker, an ammo dump or a munitions truck: the stores a unit parked beside rearms from.</summary>
     private static bool IsResupplyStore(Unit unit)
     {
-        return unit is Building
-            && CommanderSupplyStoreService.GetRearmer(unit) != null
-            && (CommanderSupplyStoreService.IsDump(unit)
-                || (unit.definition is BuildingDefinition building && building.buildingType == BuildingType.AMMO));
+        if (CommanderSupplyStoreService.GetRearmer(unit) == null)
+        {
+            return false;
+        }
+
+        return CommanderSupplyStoreService.IsMobileStore(unit)
+            || CommanderSupplyStoreService.IsDump(unit)
+            || (unit.definition is BuildingDefinition building && building.buildingType == BuildingType.AMMO);
     }
 
     /// <summary>
@@ -246,12 +251,14 @@ internal sealed class CommanderWorldMarkerRenderer
     /// </summary>
     private static void DrawResupplyRing(Camera camera, Unit store)
     {
-        if (!ResupplyRings.TryGetValue(store, out GlobalPosition[] points))
+        // A truck moves, so its ring is rebuilt every frame; a building's never changes and is cached.
+        bool mobile = store is not Building;
+        if (mobile || !ResupplyRings.TryGetValue(store, out GlobalPosition[] points))
         {
             Rearmer? rearmer = CommanderSupplyStoreService.GetRearmer(store);
             float reach = Mathf.Max(rearmer != null ? rearmer.Range : 0f, CommanderMoveService.GroundRearmReachMeters);
             GlobalPosition centre = rearmer != null ? rearmer.GetPosition() : store.GlobalPosition();
-            points = new GlobalPosition[72];
+            points = mobile ? MobileRingPoints : new GlobalPosition[72];
             for (int i = 0; i < points.Length; i++)
             {
                 float angle = i * Mathf.PI * 2f / points.Length;
@@ -265,7 +272,10 @@ internal sealed class CommanderWorldMarkerRenderer
                 points[i] = new GlobalPosition(ground.x, Mathf.Max(CommanderBuildPreview.GetSurfaceY(ground, overUnits: true), 0f) + 3f, ground.z);
             }
 
-            ResupplyRings[store] = points;
+            if (!mobile)
+            {
+                ResupplyRings[store] = points;
+            }
         }
 
         CommanderTacticalMapService? map = CommanderTacticalMapService.Instance;

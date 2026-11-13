@@ -1490,7 +1490,11 @@ internal sealed class CommanderSpawnService : ICommanderActivate, ICommanderDeac
         {
             VehicleDepot depot = sceneDepots[i];
             Unit? owner = CommanderGameAccess.GetDepotOwner(depot);
-            if (owner == null || !CommanderGameAccess.IsFriendlyUnit(owner, localHq))
+
+            // A naval dock's stand-in prefab carries a VehicleDepot too; it is not a vehicle depot.
+            if (owner == null
+                || !CommanderGameAccess.IsFriendlyUnit(owner, localHq)
+                || CommanderEconomyService.Instance?.IsBuiltNavalDock(owner) == true)
             {
                 continue;
             }

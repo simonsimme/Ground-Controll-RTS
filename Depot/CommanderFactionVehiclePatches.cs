@@ -115,8 +115,10 @@ internal static class CommanderFactionVehiclePatches
         if (automatic
             && (CommanderEnemyCommanderService.HoldsArtilleryAt(__instance!, vehicleDefinition)
                 || CommanderEnemyCommanderService.HoldsSamLauncherAt(__instance!, vehicleDefinition)
+                || CommanderEnemyCommanderService.HoldsAirDefenceAt(__instance!, vehicleDefinition)
                 || CommanderEnemyCommanderService.HoldsSiteTruckAt(__instance!, vehicleDefinition)
-                || CommanderEnemyCommanderService.HoldsAssaultAtIsland(__instance!, vehicleDefinition)))
+                || CommanderEnemyCommanderService.HoldsAssaultAtIsland(__instance!, vehicleDefinition)
+                || CommanderEnemyCommanderService.HoldsConvoyAtRear(__instance!, vehicleDefinition)))
         {
             __result = false;
             return false;

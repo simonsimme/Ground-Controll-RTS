@@ -488,6 +488,15 @@ internal static class CommanderAreaFire
                     turret.enabled = true;
                 }
             }
+
+            // Something drove the launcher off while this order had its erector up (an AI side's
+            // own artillery AI, a push): fold it for the drive. The prefix raises it again once
+            // the vehicle is stopped, as RaiseRequestedAt is back to "never asked".
+            if (entry.Value.RaiseRequestedAt > 0f && Mathf.Abs(unit.speed) >= 1f && unit is GroundVehicle vehicle)
+            {
+                entry.Value.RaiseRequestedAt = 0f;
+                vehicle.RpcDeployFireControl(deploy: false);
+            }
         }
 
         for (int i = 0; i < Stale.Count; i++)
@@ -900,8 +909,13 @@ internal static class CommanderAreaFire
     {
         if (unit is not GroundVehicle vehicle
             || !unit.TryGetComponent(out FireControl fireControl)
-            || FireControlDeployables.GetValue(fireControl) is not Array { Length: > 0 }
-            || FireControlDeployed(fireControl))
+            || FireControlDeployables.GetValue(fireControl) is not Array { Length: > 0 })
+        {
+            return true;
+        }
+
+        // MoveErector reads deployed while stowing, so a moving erector is never raised.
+        if (FireControlDeployed(fireControl) && !ErectorMoves.ContainsKey(fireControl))
         {
             return true;
         }

@@ -1003,6 +1003,13 @@ internal sealed class CommanderBuildPreview
             Vector3 side = Vector3.Cross(Vector3.up, along.normalized) * (dice.Next(2) == 0 ? 1f : -1f);
             GlobalPosition roadPoint = new(a.x + (along.x * t), a.y, a.z + (along.z * t));
             GlobalPosition candidateSite = roadPoint + (side * setback);
+
+            // The segment only has to pass near the anchor; a long one reaches kilometres past it.
+            if (FastMath.Distance(candidateSite, anchor) > maxMeters)
+            {
+                continue;
+            }
+
             Quaternion facing = FaceToward(localForward, -side);
             if (Evaluate(candidate, CommanderGameAccess.SnapToTerrain(candidateSite), hq, false, facing, out _))
             {
@@ -1762,7 +1769,11 @@ internal sealed class CommanderBuildPreview
 
     /// <summary>
     /// A blueprint has no collider until it is finished, so the overlap test cannot see it; without
-    /// this a second building could be put down on top of one still going up. Horizontal boxes only.
+    /// this a second building could be put down on top of one still going up. It has to be at least
+    /// as strict as the checks the site faces again when the other blueprint finishes first
+    /// (<see cref="CommanderEconomyService.OverlapsBuiltUnit"/>'s circles and the rotated physics
+    /// box), or two blueprints that fit side by side get the second refunded. So each footprint is
+    /// its circumscribed circle: any rotation of either box fits inside it.
     /// </summary>
     private bool OverlapsBlueprint(BuildingDefinition candidate, GlobalPosition target)
     {
@@ -1773,12 +1784,15 @@ internal sealed class CommanderBuildPreview
         }
 
         Vector3 size = GetFootprint(candidate);
+        float reach = new Vector2(size.x, size.z).magnitude;
         for (int i = 0; i < blueprints.Count; i++)
         {
             CommanderEconomyService.ConstructionSite blueprint = blueprints[i];
             Vector3 other = GetFootprint(blueprint.Definition);
-            if (Mathf.Abs(blueprint.Site.x - target.x) < size.x + other.x
-                && Mathf.Abs(blueprint.Site.z - target.z) < size.z + other.z)
+            float apart = reach + new Vector2(other.x, other.z).magnitude;
+            float dx = blueprint.Site.x - target.x;
+            float dz = blueprint.Site.z - target.z;
+            if ((dx * dx) + (dz * dz) < apart * apart)
             {
                 return true;
             }

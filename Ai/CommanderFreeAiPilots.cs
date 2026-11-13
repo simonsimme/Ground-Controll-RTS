@@ -23,7 +23,7 @@ internal static class CommanderFreeAiPilots
 
     private const float PendingSeconds = 30f;
 
-    // ponytail: a fixed respawn wait; a player's is however long they sit in the spawn menu.
+    // A fixed respawn wait; a player's is however long they sit in the spawn menu.
     private const float RespawnSeconds = 20f;
 
     /// <summary><c>Player.rankThresholds</c>, scaled by the mission's rank multiplier as the base game does.</summary>

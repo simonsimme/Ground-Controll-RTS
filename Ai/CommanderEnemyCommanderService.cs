@@ -869,6 +869,20 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
         return UnitConverter.ValueReading(funds) ?? funds.ToString("F1", CultureInfo.CurrentCulture);
     }
 
+    private static bool HasAirDefenceInReserve(FactionHQ hq)
+    {
+        foreach (KeyValuePair<VehicleDefinition, FactionHQ.RuntimeSupply> entry in hq.VehicleSupply)
+        {
+            // Ring air defence only: a StratoLance waiting is its site's, and WantsSamSite reads that.
+            if (entry.Key != null && entry.Value.Count > 0 && IsAirDefence(entry.Key) && !IsSamSiteLauncher(entry.Key))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static bool IsAirDefence(VehicleDefinition definition)
     {
         return definition.vehicleType is VehicleType.AAA or VehicleType.IR_SAM or VehicleType.R_SAM;
@@ -1121,8 +1135,10 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
     private static float TakeWarFund(FactionHQ hq, CommanderState state)
     {
         float now = Time.time;
+
+        // Net of upkeep, so the balance still reaches the next mine.
         float war = state.WarFundAt >= 0f
-            ? CommanderEconomyService.GetEnemyIncomePerMinute(hq) * WarFundIncomeShare * (now - state.WarFundAt) / 60f
+            ? Mathf.Max(0f, CommanderEconomyService.GetEnemyNetIncomePerMinute(hq)) * WarFundIncomeShare * (now - state.WarFundAt) / 60f
             : 0f;
         state.WarFundAt = now;
 
@@ -1687,6 +1703,13 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
         ownedEscorts = 0;
         ownedBallistic = 0;
         ownedBases = CommanderVictoryService.CountBases(hq);
+
+        // Not while air defence already waits in the reserve: it is on its way to that base's door,
+        // and buying more past the cap would only pile up there.
+        reviewAirShort = states.TryGetValue(hq, out CommanderState airState) && airState.AirGuardShort && !HasAirDefenceInReserve(hq);
+        reviewSamWanted = airState != null && airState.WantsSamSite;
+        reviewLadsWanted = airState != null && LadsWanted(hq, airState);
+
         ringGunsFirst = ChooseRingGun(hq) != null;
 
         // Off the bases held, not the guard's site plan: that is only laid once the ring has posts.
@@ -1920,13 +1943,15 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
         // Time.time, so a review skipped by a dry spell still counts.
         if (state.SamFundAt >= 0f)
         {
-            state.SamFund += CommanderEconomyService.GetEnemyIncomePerMinute(hq) * SamFundIncomeShare * (Time.time - state.SamFundAt) / 60f;
+            state.SamFund += Mathf.Max(0f, CommanderEconomyService.GetEnemyNetIncomePerMinute(hq))
+                * SamFundIncomeShare * (Time.time - state.SamFundAt) / 60f;
         }
 
         state.SamFundAt = Time.time;
 
-        // Buildings spend the same balance, so the fund can claim more than is left.
-        state.SamFund = Mathf.Min(state.SamFund, Mathf.Max(0f, hq.factionFunds));
+        // Buildings spend the same balance, so the fund can claim more than is left. Never the mine
+        // savings: this fund spends past the build reserve.
+        state.SamFund = Mathf.Min(state.SamFund, Mathf.Max(0f, hq.factionFunds - state.MineFund));
 
         // No timer: money is the only limit. The pass bound only keeps one review finite.
         float share = spendable * SamSiteBudgetShare;
@@ -2005,19 +2030,33 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
         TryBuySamLauncher(hq, state, 0f);
     }
 
-    /// <summary>A LADS or CRAM while a base is short of one of each, whichever is fewer. These come
-    /// before the Boltstrike and the StratoLance.</summary>
+    /// <summary>A LADS while some base is short of <see cref="LadsPerBase"/>, else a CRAM likewise, counted per base. These
+    /// come before the Boltstrike and the StratoLance.</summary>
     private VehicleDefinition? ChooseRingGun(FactionHQ hq)
     {
+        if (!states.TryGetValue(hq, out CommanderState state))
+        {
+            return null;
+        }
+
         VehicleDefinition? lads = FindInCatalog(LadsName);
         VehicleDefinition? cram = FindInCatalog(CramName);
-        int bases = CommanderVictoryService.CountBases(hq);
-        int ownedLads = lads != null ? CountOwned(hq, lads) : bases;
-        int ownedCram = cram != null ? CountOwned(hq, cram) : bases;
-        VehicleDefinition? gun = ownedLads >= bases && ownedCram >= bases ? null
-            : ownedCram < ownedLads ? cram
-            : lads ?? cram;
+        VehicleDefinition? gun = lads != null && BaseLacks(hq, state, lads, LadsPerBase) ? lads
+            : cram != null && BaseLacks(hq, state, cram, 1) ? cram
+            : null;
         return gun != null && CommanderUnitCap.Enabled && IsAirDefenceFull(gun) ? null : gun;
+    }
+
+    /// <summary>A LADS while some base is short of <see cref="LadsPerBase"/>, whatever the ring quota
+    /// says. Before the rings have posts, counted for the faction, since BaseLacks reads no posts as
+    /// not short.</summary>
+    private bool LadsWanted(FactionHQ hq, CommanderState state)
+    {
+        VehicleDefinition? lads = FindInCatalog(LadsName);
+        return lads != null && !CommanderUnitCap.Enabled
+            && (state.DefencePosts.Count == 0
+                ? CountOwned(hq, lads) < ownedBases * LadsPerBase
+                : BaseLacks(hq, state, lads, LadsPerBase));
     }
 
     /// <summary>The next radar SAM to save for: whichever of the two the commander has fewer of,
@@ -2027,8 +2066,10 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
         VehicleDefinition? stratolance = state.WantsSamSite ? ChooseSamLauncherUnit(float.MaxValue) : null;
         VehicleDefinition? boltstrike = FindInCatalog(BoltstrikeName);
         int boltstrikes = boltstrike != null ? CountOwned(hq, boltstrike) : 0;
+
+        // Per base, like the ring guns: BoltstrikesPerBase at every base that can field one.
         if (boltstrike != null
-            && (boltstrikes >= WantedBoltstrikes(hq) || (CommanderUnitCap.Enabled && IsAirDefenceFull(boltstrike))))
+            && (!BaseLacks(hq, state, boltstrike, BoltstrikesPerBase) || (CommanderUnitCap.Enabled && IsAirDefenceFull(boltstrike))))
         {
             boltstrike = null;
         }
@@ -2478,6 +2519,9 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
         /// <summary>Each artillery vehicle's firing position, picked once and then kept.</summary>
         internal Dictionary<Unit, GlobalPosition> Batteries { get; } = new();
 
+        /// <summary>The player base each gun's post was picked against. A new one moves the post.</summary>
+        internal Dictionary<Unit, Airbase> BatteryTargets { get; } = new();
+
         /// <summary>The depot nearest the strike target, the only one new artillery rolls out of, and
         /// how far it is from that target. Re-read by <c>ReviewArtillery</c>.</summary>
         internal VehicleDepot? ArtilleryDepot { get; set; }
@@ -2626,6 +2670,16 @@ internal sealed partial class CommanderEnemyCommanderService : ICommanderTickPer
         internal bool WantsGuardTruck { get; set; }
 
         internal int DefenceBaseCount { get; set; } = -1;
+
+        /// <summary>Ground defenders each base's own ring holds, set each guard review.</summary>
+        internal int GroundPerBase { get; set; }
+
+        /// <summary>Ring air defence each base holds; StratoLances are on top, per site.</summary>
+        internal int AirPerBase { get; set; }
+
+        /// <summary>The depots at bases short of their air defence: while there are any, new air
+        /// defence rolls out only at these. Set each guard review.</summary>
+        internal List<VehicleDepot> AirShortDepots { get; } = new();
 
         /// <summary>The bases <see cref="DefencePosts"/> were laid for.</summary>
         internal List<Airbase> DefenceBases { get; } = new();

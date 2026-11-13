@@ -31,6 +31,10 @@ internal static class CommanderSettings
     // Off by default. Enemy units are not drawn until seen: see CommanderFogOfWarService.
     internal static bool FogOfWar { get => CommanderMapSettings.OverrideBool(CommanderMapSettings.FogOfWarPrefix) ?? Get("Gameplay", "FogOfWar", false); set => Set("Gameplay", "FogOfWar", value); }
 
+    // Off by default. On, no base changes hands: the capture bar never moves, the player gets no
+    // capture orders and the AI commanders only attack and defend.
+    internal static bool DisableCapture { get => CommanderMapSettings.OverrideBool(CommanderMapSettings.CaptureOffPrefix) ?? Get("Gameplay", "DisableCapture", false); set => Set("Gameplay", "DisableCapture", value); }
+
     internal static bool DisableFriendlyAi { get => CommanderMapSettings.OverrideBool(CommanderMapSettings.FriendlyAiOffPrefix) ?? Get("Gameplay", "DisableFriendlyAi", false); set => Set("Gameplay", "DisableFriendlyAi", value); }
 
     // Off by default. One cap per side, both sides: see CommanderUnitCap.
@@ -565,6 +569,7 @@ internal static class CommanderSettings
         _ = MobileArtilleryCost;
         _ = AircraftCaptureStrength;
         _ = FogOfWar;
+        _ = DisableCapture;
         _ = CaptureRecoveryPerSecond;
         _ = SupplyFuelCapacityKg;
         _ = StartingFuelKg;

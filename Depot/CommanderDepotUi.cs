@@ -6,9 +6,8 @@ namespace GroundControlRts;
 
 internal sealed class CommanderDepotUi
 {
-    /// <summary>Teammates' queues the window has room for, one line each.</summary>
-    internal const int MaxTeamLines = 4;
-    internal const float TeamLineHeight = 18f;
+    /// <summary>One teammate's queue per row, tall enough for the label at full size.</summary>
+    internal const float TeamLineHeight = 22f;
 
     private const int WindowId = 0x434F4D44;
 
@@ -98,15 +97,25 @@ internal sealed class CommanderDepotUi
     }
 
     /// <summary>What teammates have queued: theirs to cancel, so this only reads.</summary>
-    internal static void DrawTeamQueues(Rect rect, List<string> lines, int rows)
+    /// <param name="rect">The box; it grows with the queue bar's splitter and shows as many rows as fit.</param>
+    /// <param name="lines">One line per teammate's queue.</param>
+    internal static void DrawTeamQueues(Rect rect, List<string> lines)
     {
         GUI.Box(rect, string.Empty, CommanderUiTheme.Inset);
+        int rows = Mathf.Clamp(Mathf.FloorToInt((rect.height - 24f) / TeamLineHeight), 1, lines.Count);
         int hidden = lines.Count - rows;
         GUI.Label(new Rect(rect.x + 10f, rect.y + 2f, rect.width - 20f, 18f), hidden > 0 ? $"TEAM QUEUES  (+{hidden} MORE)" : "TEAM QUEUES", CommanderUiTheme.Caption);
         for (int i = 0; i < rows; i++)
         {
-            CommanderUiTheme.FitLabel(new Rect(rect.x + 10f, rect.y + 20f + (i * TeamLineHeight), rect.width - 20f, TeamLineHeight), lines[i], CommanderUiTheme.MutedLabel);
+            // One line, never wrapped, so the text keeps its size.
+            CommanderUiTheme.FitLineLabel(new Rect(rect.x + 10f, rect.y + 22f + (i * TeamLineHeight), rect.width - 20f, TeamLineHeight), lines[i], CommanderUiTheme.Label);
         }
+    }
+
+    /// <summary>The team box matches the queue bar above it, so dragging the splitter grows both.</summary>
+    internal static float TeamQueuesHeight(List<string>? lines, float queueHeight)
+    {
+        return lines == null || lines.Count == 0 ? 0f : queueHeight;
     }
 
     internal void ResetPosition()
@@ -260,12 +269,13 @@ internal sealed class CommanderDepotUi
         float detailWidth = CommanderWindowScale.Section(WindowId, DetailSlot, DefaultDetailWidth, 160f, windowRect.width - 200f);
         float statusHeight = string.IsNullOrWhiteSpace(spawnService.StatusText) ? 0f : 24f;
         List<string>? teamLines = CommanderTeamQueueService.Instance?.Lines;
-        int teamRows = Mathf.Min(teamLines?.Count ?? 0, MaxTeamLines);
-        float teamHeight = teamRows > 0 ? 28f + (teamRows * TeamLineHeight) : 0f;
+        bool hasTeam = teamLines != null && teamLines.Count > 0;
 
         // The queue bar trades with the vehicle list, so a drag never pushes the rows below it out.
-        float maxQueue = Mathf.Max(DefaultQueueHeight, windowRect.height - y - teamHeight - statusHeight - 16f - 120f);
+        // The team box takes the same height again, so the drag range halves when it shows.
+        float maxQueue = Mathf.Max(DefaultQueueHeight, (windowRect.height - y - statusHeight - 16f - 120f) / (hasTeam ? 2f : 1f));
         float queueHeight = CommanderWindowScale.Section(WindowId, QueueSlot, DefaultQueueHeight, DefaultQueueHeight, maxQueue);
+        float teamHeight = TeamQueuesHeight(teamLines, queueHeight);
         float listHeight = Mathf.Max(120f, windowRect.height - y - queueHeight - teamHeight - statusHeight - 16f);
         DrawVehicleList(new Rect(12f, y, windowRect.width - 24f - detailWidth - 8f, listHeight));
         DrawDetail(new Rect(windowRect.width - 12f - detailWidth, y, detailWidth, listHeight));
@@ -275,9 +285,9 @@ internal sealed class CommanderDepotUi
         CommanderWindowScale.Splitter(
             WindowId, QueueSlot, new Rect(12f, y - 8f, windowRect.width - 24f, 8f), alongX: false, inverted: true, queueHeight, DefaultQueueHeight, maxQueue);
         DrawQueue(new Rect(12f, y, windowRect.width - 24f, queueHeight - 8f));
-        if (teamRows > 0)
+        if (hasTeam)
         {
-            DrawTeamQueues(new Rect(12f, y + queueHeight, windowRect.width - 24f, teamHeight - 8f), teamLines!, teamRows);
+            DrawTeamQueues(new Rect(12f, y + queueHeight, windowRect.width - 24f, teamHeight - 8f), teamLines!);
         }
 
         if (statusHeight > 0f)
