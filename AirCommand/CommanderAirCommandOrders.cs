@@ -48,6 +48,15 @@ internal sealed partial class CommanderAirCommandService
         return true;
     }
 
+    /// <summary>True when a player (host or guest), not an AI commander, has this aircraft on a mission.</summary>
+    internal static bool HasPlayerOrder(Aircraft? aircraft)
+    {
+        return aircraft != null
+            && Instance != null
+            && Instance.missions.TryGetValue(aircraft, out AirMission? mission)
+            && IsPlayerMission(mission);
+    }
+
     /// <summary>
     /// The aircraft row. It says what the aeroplane is, what it costs and whether one is already in
     /// stock — not how many of the weapon currently picked in a different panel it happens to fit,

@@ -23,6 +23,9 @@ internal static class CommanderAirCommandPatches
     private static readonly AccessTools.FieldRef<PilotBaseState, Aircraft> StateAircraftRef =
         AccessTools.FieldRefAccess<PilotBaseState, Aircraft>("aircraft");
 
+    private static readonly AccessTools.FieldRef<Autopilot.ExclusionZoneChecker, Aircraft> ExclusionCheckerAircraftRef =
+        AccessTools.FieldRefAccess<Autopilot.ExclusionZoneChecker, Aircraft>("aircraft");
+
     private static readonly AccessTools.FieldRef<AIPilotCombatModes, float> TimeWithoutTargetRef =
         AccessTools.FieldRefAccess<AIPilotCombatModes, float>("timeWithoutTarget");
 
@@ -511,6 +514,41 @@ internal static class CommanderAirCommandPatches
         CommanderHeloRoadRoute.Apply(__instance, ref destination);
         CommanderAirCommandService.HoldHeloAltitude(__instance, ref altitudeHold);
         return CommanderAirTerrainGuard.ApplyRotor(__instance);
+    }
+
+    /// <summary>
+    /// A nuke's exclusion zone makes <c>AutopilotPlane</c> / <c>AutopilotTiltwing.AutoAim</c> throw
+    /// away the destination and fly 10 km straight out, every frame the aircraft is in or heading
+    /// into it. A player's order outranks that: the player saw the zone and sent it anyway.
+    /// A postfix, so the common case (no warning) costs one bool test.
+    /// </summary>
+    [HarmonyPatch(typeof(Autopilot.ExclusionZoneChecker), nameof(Autopilot.ExclusionZoneChecker.TryGetWarning))]
+    [HarmonyPostfix]
+    private static void ExclusionZoneWarningPostfix(Autopilot.ExclusionZoneChecker __instance, ref Vector3 avoidanceVector, ref bool __result)
+    {
+        if (__result && CommanderAirCommandService.HasPlayerOrder(ExclusionCheckerAircraftRef(__instance)))
+        {
+            avoidanceVector = Vector3.zero;
+            __result = false;
+        }
+    }
+
+    /// <summary>
+    /// <c>FactionHQ.GetExclusionZones</c> only drops a zone once its missile is out of the unit
+    /// registry. A missile scrapped with DELETE is disabled, not destroyed, so its zone stayed up
+    /// forever and every AI pilot circled the empty target. Disabled counts as gone.
+    /// </summary>
+    [HarmonyPatch(typeof(FactionHQ), nameof(FactionHQ.GetExclusionZones))]
+    [HarmonyPostfix]
+    private static void GetExclusionZonesPostfix(List<NuclearOption.ExclusionZone> __result)
+    {
+        for (int i = __result.Count - 1; i >= 0; i--)
+        {
+            if (UnitRegistry.TryGetUnit(__result[i].sourceId, out Unit unit) && unit != null && unit.disabled)
+            {
+                __result.RemoveAt(i);
+            }
+        }
     }
 
     [HarmonyPatch(typeof(Autopilot), nameof(Autopilot.Hover))]

@@ -1,5 +1,15 @@
 ﻿# Changelog
 
+## Unreleased
+
+### Changed
+
+- Aircraft you give an order to now fly it even through a nuclear exclusion zone, instead of turning away.
+
+### Fixed
+
+- Deleting an incoming nuke now clears its exclusion zone, so AI aircraft stop circling the area and can land at or capture the base again.
+
 ## 1.0.0.4
 
 ### Added
